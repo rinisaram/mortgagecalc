@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mortgage Calculator</title>
+    <style>
+        body {
+            font-family: open sans, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Changed to flex-start */
+            padding: 20px; /* Added padding */
+            background-color: #f0f0f0;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%; /* Changed to 100% */
+            max-width: 400px; /* Added max-width */
+        }
+        h1, h2 {
+            text-align: center;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+        .calculate-btn {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background-color: #007BFF;
+            color: #ffffff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .calculate-btn:hover {
+            background-color: #0056b3;
+        }
+        .breakdown, .chart-container {
+            margin-top: 20px;
+        }
+        .chart-container {
+            text-align: center;
+        }
+        .chart-container .chart {
+            position: relative;
+            display: inline-block;
+        }
+        .chart-container .chart canvas {
+            display: block;
+            margin: 0 auto;
+        }
+        .chart-container .chart .center-label {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 18px;
+        }
+        .legend {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .legend div {
+            margin-right: 15px;
+        }
+        .legend .color-box {
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .color-principal { background-color: blue; }
+        .color-insurance { background-color: green; }
+        .color-tax { background-color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Mortgage Calculator</h1>
+        <h2>Use our mortgage calculator to estimate your monthly mortgage payment</h2>
+        <div class="input-group">
+            <label for="homePrice">Home Price ($)</label>
+            <input type="number" id="homePrice" placeholder="Enter home price in $">
+        </div>
+        <div class="input-group">
+            <label for="downPayment">Down Payment ($)</label>
+            <input type="number" id="downPayment" placeholder="Enter down payment in $">
+        </div>
+        <div class="input-group">
+            <label for="loanLength">Length of Loan (years)</label>
+            <input type="number" id="loanLength" placeholder="Enter length of loan in years">
+        </div>
+        <div class="input-group">
+            <label for="interestRate">Interest Rate (%)</label>
+            <input type="number" step="0.01" id="interestRate" placeholder="Enter interest rate in %">
+        </div>
+        <button class="calculate-btn" onclick="calculateMortgage()">Calculate</button>
+        <div class="breakdown">
+            <h2>Payment Breakdown</h2>
+            <h3>My monthly payment</h3>
+            <div class="chart-container">
+                <div class="chart">
+                    <canvas id="paymentChart" width="200" height="200"></canvas>
+                    <div class="center-label" id="monthlyPayment">$0</div>
+                </div>
+                <div class="legend">
+                    <div><span class="color-box color-principal"></span> Principal & Interest</div>
+                    <div><span class="color-box color-insurance"></span> Homeowners Insurance</div>
+                    <div><span class="color-box color-tax"></span> Property Tax</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function calculateMortgage() {
+            // Get input values
+            const homePrice = parseFloat(document.getElementById('homePrice').value);
+            const downPayment = parseFloat(document.getElementById('downPayment').value);
+            const loanLength = parseInt(document.getElementById('loanLength').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value) / 100;
+
+            // Calculate monthly interest rate and total number of payments
+            const monthlyInterestRate = interestRate / 12;
+            const totalPayments = loanLength * 12;
+
+            // Calculate loan amount
+            const loanAmount = homePrice - downPayment;
+
+            // Calculate monthly mortgage payment
+            const monthlyPayment = (loanAmount * monthlyInterestRate) / (1 - Math.pow(1 + monthlyInterestRate, -totalPayments));
+            const monthlyPaymentRounded = monthlyPayment.toFixed(2);
+
+            // Update monthly payment display
+            document.getElementById('monthlyPayment').innerText = `$${monthlyPaymentRounded}`;
+
+            // Create the pie chart
+            const ctx = document.getElementById('paymentChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Principal & Interest', 'Homeowners Insurance', 'Property Tax'],
+                    datasets: [{
+                        data: [monthlyPaymentRounded, 100, 50], // Placeholder values for insurance and tax
+                        backgroundColor: ['blue', 'green', 'red']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</body>
+</html>
